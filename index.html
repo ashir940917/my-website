@@ -1,0 +1,275 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>SyntaxTree – English &amp; Bangla Syntax Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:wght@500;700&family=Noto+Sans+Bengali:wght@400;600&family=Hanken+Grotesk:wght@400;600&display=swap">
+<style>
+:root{--bg:#eaf0ed;--pn:#fbfcfa;--ink:#17262b;--mu:#5d6f72;--ln:#cbd8d4;--ac:#0b6e6e;--ac2:#2f3d8f;--wa:#8a5a00;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root:not([data-theme="light"]){color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f191b;--pn:#172427;--ink:#e6efed;--mu:#97aaa8;--ln:#2d4448;--ac:#4fd1c5;--ac2:#9db0ff;--wa:#e0b05c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f191b;--pn:#172427;--ink:#e6efed;--mu:#97aaa8;--ln:#2d4448;--ac:#4fd1c5;--ac2:#9db0ff;--wa:#e0b05c;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Hanken Grotesk","Noto Sans Bengali",system-ui,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--ln);background:var(--pn)}
+h1{font:700 24px "Newsreader",Georgia,serif;margin:0}h1 small{display:block;font:400 13px "Hanken Grotesk",sans-serif;color:var(--mu)}
+.sp{flex:1}button,select,textarea{font:inherit;color:inherit}
+button,select{background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:7px 11px;cursor:pointer}
+button.p{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:600}button:hover{border-color:var(--ac)}
+:focus-visible{outline:3px solid var(--ac2);outline-offset:2px}
+main{display:grid;gap:14px;padding:14px;max-width:1500px;margin:auto}
+@media(min-width:960px){main{grid-template-columns:330px 1fr}}
+.card{background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:14px;min-width:0}
+textarea{width:100%;min-height:110px;padding:10px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);font-size:18px;font-family:"Noto Sans Bengali","Hanken Grotesk",sans-serif;resize:vertical}
+label{display:block;font-size:13px;color:var(--mu);margin:10px 0 4px}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#err{color:#b3261e;min-height:20px;font-size:13px;margin-top:6px}
+.ban{background:color-mix(in srgb,var(--wa) 14%,transparent);border-left:4px solid var(--wa);padding:8px 12px;border-radius:6px;font-size:13px;margin-bottom:10px}
+.stage{display:grid;gap:12px}@media(min-width:1150px){.stage{grid-template-columns:1fr 270px}}
+.sc{overflow:auto;border:1px solid var(--ln);border-radius:10px;max-height:560px;cursor:grab;background:var(--bg)}
+.tb{display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap}.tb b{font:700 17px Newsreader,serif;margin-right:auto}
+#det{font-size:14px}#det h3{margin:0 0 6px;font:700 18px Newsreader,serif}.chip{display:inline-block;padding:1px 8px;border:1px solid var(--ln);border-radius:20px;margin:2px;font-size:13px}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--ln)}.tw{overflow:auto}
+h2{font:700 18px Newsreader,serif;margin:14px 0 6px}.lg span{margin-right:12px;white-space:nowrap;font-size:13px}
+dialog{max-width:560px;background:var(--pn);color:var(--ink);border:1px solid var(--ln);border-radius:12px}
+body.min .ban,body.min .lg,body.min #det,body.min .tw,body.min h2,body.min #exp,body.min .row.noprint,body.min #hp,body.min #ab,body.min #xl,body.min #ex,body.min #md,body.min label[for=ex],body.min label[for=md],body.min aside p{display:none}body.min .stage{grid-template-columns:1fr}body.min main{max-width:1100px}body.min .sc{max-height:none}
+@media print{header,aside,.tb button,.noprint{display:none!important}main{display:block}.sc{max-height:none}}
+@media(prefers-reduced-motion:no-preference){.nd rect{transition:fill .15s}}
+</style></head><body>
+<header><h1>SyntaxTree<small>English &amp; Bangla Syntax Analyzer</small></h1><div class="sp"></div>
+<select id="lang" aria-label="Input language"><option value="auto">Auto detect</option><option value="en">English</option><option value="bn">বাংলা</option></select>
+<select id="xl" aria-label="Explanation language"><option value="en">Explain in English</option><option value="bn">বাংলায় ব্যাখ্যা</option></select>
+<button id="th" aria-label="Toggle theme">Light / Dark</button><button id="hp">Help</button><button id="ab">About</button></header>
+<main><aside class="card"><label for="in">Sentence</label><textarea id="in" lang="und" placeholder="Type an English or Bangla sentence…"></textarea><div id="err" role="alert"></div>
+<label for="md">Analysis mode</label><select id="md"><option value="both">Both views</option><option value="c">Constituency tree</option><option value="d">Dependency tree</option><option value="m">Minimalist Program (Merge / bare phrase structure)</option><option value="b">Binary tree (strictly binary branching)</option><option value="all">All three views</option></select>
+<label for="ex">Example sentences</label><select id="ex"></select>
+<div class="row"><button class="p" id="go">Generate Syntax Tree</button><button id="ld">Load Example</button><button id="cl">Clear</button></div>
+<p style="font-size:12px;color:var(--mu)">Ctrl/Cmd + Enter generates the tree. Dashed nodes are low-confidence guesses.</p></aside>
+<section id="out" class="card"><p style="color:var(--mu)">Enter a sentence or load an example to see its syntax tree.</p></section></main>
+<dialog id="dg"><div id="dgc"></div><form method="dialog"><button>Close</button></form></dialog>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const NF=s=>s.normalize('NFC'),Ls=s=>new Set(NF(s).split(' ')),R=s=>new RegExp(NF(s));
+const GL={S:['Sentence','বাক্য'],SBARQ:['Wh-question clause','প্রশ্নবাচক বাক্য'],SQ:['Inverted question clause','প্রশ্নবাচক (উল্টানো) বাক্য'],NP:['Noun phrase','বিশেষ্য পদগুচ্ছ'],VP:['Verb phrase','ক্রিয়া পদগুচ্ছ'],PP:['Prepositional / postpositional phrase','অনুসর্গ পদগুচ্ছ'],ADJP:['Adjective phrase','বিশেষণ পদগুচ্ছ'],ADVP:['Adverb phrase','ক্রিয়া-বিশেষণ পদগুচ্ছ'],SBAR:['Subordinate clause','অধীন বাক্য'],WHNP:['Wh noun phrase','প্রশ্নবাচক বিশেষ্য'],WHADVP:['Wh adverb phrase','প্রশ্নবাচক ক্রিয়া-বিশেষণ'],FRAG:['Fragment (no full parse)','খণ্ডিত বাক্যাংশ'],DT:['Determiner','নির্দেশক'],NN:['Noun','বিশেষ্য'],NNS:['Plural noun','বহুবচন বিশেষ্য'],NNP:['Proper noun','নামবাচক বিশেষ্য'],PRP:['Personal pronoun','সর্বনাম'],VB:['Verb, base form','ক্রিয়া (মূল রূপ)'],VBD:['Verb, past tense','অতীত ক্রিয়া'],VBG:['Verb, -ing form','চলমান ক্রিয়া'],VBN:['Past participle','অতীত কৃদন্ত'],VBP:['Verb, present','বর্তমান ক্রিয়া'],VBZ:['Verb, 3rd-person present','বর্তমান ক্রিয়া (নাম পুরুষ)'],MD:['Modal','মডাল সহায়ক'],JJ:['Adjective','বিশেষণ'],RB:['Adverb / negation','ক্রিয়া-বিশেষণ / নঞর্থক'],IN:['Preposition / subordinator','অনুসর্গ / সংযোজক'],CC:['Coordinating conjunction','সংযোজক অব্যয়'],CD:['Cardinal number','সংখ্যাবাচক'],TO:['"to"','"to"'],WP:['Wh-pronoun','প্রশ্নবাচক সর্বনাম'],WRB:['Wh-adverb','প্রশ্নবাচক ক্রিয়া-বিশেষণ'],'.':['Punctuation','যতিচিহ্ন'],VM:['Main verb','মূল ক্রিয়া'],VAUX:['Auxiliary verb','সহায়ক ক্রিয়া'],PSP:['Postposition','অনুসর্গ'],QF:['Quantifier','পরিমাণবাচক শব্দ'],PUNC:['Punctuation','যতিচিহ্ন'],CS:['Subordinating conjunction','অধীনতাসূচক অব্যয়'],WQ:['Question word','প্রশ্নসূচক শব্দ']};
+const DR={root:['root predicate','মূল ক্রিয়া'],nsubj:['nominal subject','কর্তা'],'nsubj:pass':['passive subject','কর্মবাচ্যের কর্তা'],obj:['object','কর্ম'],amod:['adjectival modifier','বিশেষণ'],advmod:['adverbial modifier','ক্রিয়া-বিশেষণ'],det:['determiner','নির্দেশক'],case:['case marker','কারক চিহ্ন'],obl:['oblique nominal','অপ্রত্যক্ষ কারক'],aux:['auxiliary','সহায়ক ক্রিয়া'],conj:['conjunct','সংযোজিত পদ'],punct:['punctuation','যতিচিহ্ন'],nummod:['numeric modifier','সংখ্যাবাচক বিশেষণ'],compound:['compound','যৌগিক পদ'],'compound:lvc':['light-verb construction','যৌগিক ক্রিয়ার অংশ'],mark:['subordinating marker','অধীনতাসূচক'],ccomp:['clausal complement','বাক্যাংশ পূরক'],xcomp:['predicate complement','পূরক'],nmod:['nominal modifier','সম্বন্ধ পদ'],dep:['unspecified','অনির্দিষ্ট']};
+const TY={declarative:['declarative','বিবৃতিমূলক'],interrogative:['interrogative','প্রশ্নবোধক'],imperative:['imperative','অনুজ্ঞাসূচক'],exclamatory:['exclamatory','বিস্ময়সূচক']};
+const EX={en:['The boy eats rice.','The girl is reading a book.','Rahim went to school yesterday.','The intelligent student solved the difficult problem.','I know that he is honest.','What are you doing?','The book was written by the author.','She did not go to school.'],bn:['আমি ভাত খাই।','মেয়েটি একটি বই পড়ছে।','রহিম গতকাল স্কুলে গিয়েছিল।','বুদ্ধিমান ছাত্রটি কঠিন সমস্যাটি সমাধান করেছে।','আমি জানি যে সে সৎ।','তুমি কী করছ?','বইটি লেখকের দ্বারা লেখা হয়েছিল।','সে স্কুলে যায়নি।']};
+let W=[];const N=(label,children,x)=>({label,children,...x}),pre=t=>({label:t.pos,word:t.text,idx:t.index,children:[],unsure:t.unsure});
+/* ---------- language detection & tokenization ---------- */
+function detect(s){const b=(s.match(/[\u0980-\u09FF]/g)||[]).length,l=(s.match(/[A-Za-z]/g)||[]).length;return b+l===0?null:b>=l?'bn':'en'}
+const tokEN=s=>s.match(/[A-Za-z]+(?=n't\b)|n't|[A-Za-z]+(?:[-'][A-Za-z]+)*|\d+(?:\.\d+)?|[^\s]/g)||[];
+const tokBN=s=>NF(s).match(/[\u0980-\u09FF\u200c\u200d]+|[A-Za-z]+|\d+|[^\s]/g)||[];
+/* ---------- English tagger ---------- */
+const E={DT:Ls('the a an this these those my his her its our your their some any every each no'),PRP:Ls('i you he she it we they me him them us'),IN:Ls('in on at by with from for of about into over under after before because if while although since through during than as that'),CC:Ls('and or but nor'),AUX:Ls('is are was were am be been being do does did has have had will would can could shall should may might must'),RB:Ls('yesterday today tomorrow now very quickly slowly often always here there too also'),WP:Ls('what who whom which'),WRB:Ls('where when why how'),JJ:Ls('intelligent difficult honest big small good bad new old young happy sad beautiful easy hard tall short smart red blue green kind'),V:Ls('eat eats ate eaten read reads go goes went gone write writes wrote written solve solves solved know knows knew see sees saw seen take takes took give gives gave make makes made come comes came run runs ran say says said think thinks thought like likes want wants need needs love loves play plays played study studies studied'),VBD:Ls('ate went wrote knew saw took gave came ran said thought'),VBN:Ls('eaten gone written known seen taken given'),KN:Ls('boy girl student book rice school problem author man woman child teacher water food park house city dog cat')};
+const AXT={is:'VBZ',does:'VBZ',has:'VBZ',are:'VBP',do:'VBP',have:'VBP',am:'VBP',was:'VBD',were:'VBD',did:'VBD',had:'VBD',been:'VBN',being:'VBG',be:'VB'},BEF=Ls('is are was were be been being has have had am');
+const IR={ate:'eat',eaten:'eat',went:'go',gone:'go',wrote:'write',written:'write',knew:'know',known:'know',saw:'see',seen:'see',took:'take',gave:'give',came:'come',ran:'run',said:'say',thought:'think',is:'be',are:'be',was:'be',were:'be',am:'be',been:'be',did:'do',does:'do',has:'have',had:'have'};
+function lemEN(w,p){const l=w.toLowerCase();if(IR[l])return IR[l];if(!/^(VB|NNS)/.test(p))return l;if(/ies$/.test(l))return l.slice(0,-3)+'y';if(p==='VBG'&&/ing$/.test(l))return l.slice(0,-3);if(/[vcz]ed$/.test(l))return l.slice(0,-1);if(/ed$/.test(l))return l.slice(0,-2);if(/[^s]s$/.test(l))return l.slice(0,-1);return l}
+function tagEN(ws){const T=[];ws.forEach((w,i)=>{const l=w.toLowerCase();let p=T.filter(x=>!x.neg).pop(),pos,u=false,aux=false,neg=false,v=false;
+if(/^[^\w\s]$/.test(w))pos='.';else if(/^\d/.test(w))pos='CD';else if(l==='not'||l==="n't"||l==='never'){pos='RB';neg=true}else if(l==='to')pos='TO';
+else if(l==='that')pos=p&&/^VB/.test(p.pos)&&!p.aux?'IN':'DT';
+else if(E.AUX.has(l)){aux=true;pos=AXT[l]||'MD'}else if(E.WP.has(l))pos='WP';else if(E.WRB.has(l))pos='WRB';else if(E.PRP.has(l))pos='PRP';else if(E.DT.has(l))pos='DT';else if(E.IN.has(l))pos='IN';else if(E.CC.has(l))pos='CC';else if(E.RB.has(l))pos='RB';else if(E.JJ.has(l))pos='JJ';
+else if(E.V.has(l)||(/(ing|ed)$/.test(l)&&l.length>4)){v=true;const pb=p&&p.aux&&BEF.has(p.text.toLowerCase()),pm=p&&(p.pos==='MD'||p.pos==='TO'||/^do(es)?$|^did$/.test(p.text.toLowerCase()));
+pos=/ing$/.test(l)?'VBG':E.VBN.has(l)||(pb&&(E.VBD.has(l)||/ed$/.test(l)))?'VBN':E.VBD.has(l)||/ed$/.test(l)?'VBD':/[^s]s$/.test(l)?'VBZ':pm?'VB':'VBP';if(!E.V.has(l))u=true}
+else{pos=/[^su]s$/.test(l)&&l.length>3?'NNS':'NN';if(/^[A-Z]/.test(w)&&(i>0||true)){pos=pos==='NNS'?'NNPS':'NNP'}else if(!E.KN.has(l))u=true}
+T.push({text:w,index:i,pos,aux,neg,unsure:u,lemma:'',feat:''});T[i].lemma=lemEN(w,pos)});return T}
+/* ---------- English parser ---------- */
+const isV=x=>x&&(x.aux||/^(VB|MD)/.test(x.pos)),hasV=(t,a,b)=>t.slice(a,b).some(isV);
+function npEN(t,p,j){if(p>=j)return null;if(t[p].pos==='PRP')return[N('NP',[pre(t[p])]),p+1];let q=p;const c=[];if(t[q].pos==='DT'){c.push(pre(t[q]));q++}
+const a=q;while(q<j&&/^(JJ|CD)$/.test(t[q].pos))q++;const b=q;while(q<j&&/^NN/.test(t[q].pos))q++;
+if(q===b&&!c.length){return b>a?[N('ADJP',t.slice(a,b).map(pre)),b]:null}if(!c.length&&q===a)return null;return[N('NP',[...c,...t.slice(a,q).map(pre)]),q]}
+function seqEN(t,i,j,att){const o=[];let p=i;while(p<j){const x=t[p];
+if(x.pos==='IN'||x.pos==='TO'){if(x.text.toLowerCase()==='that'&&p+1<j&&hasV(t,p+1,j)){o.push(N('SBAR',[pre(x),clauseEN(t,p+1,j)]));break}
+const r=npEN(t,p+1,j);if(r){const pp=N('PP',[pre(x),r[0]]);p=r[1];if(att&&o.length&&o[o.length-1].label==='NP')o[o.length-1]=N('NP',[o[o.length-1],pp]);else o.push(pp);continue}}
+const r=npEN(t,p,j);if(r){o.push(r[0]);p=r[1];continue}if(x.pos==='RB'){o.push(N('ADVP',[pre(x)]));p++;continue}o.push(pre(x));p++}return o}
+function vpEN(t,k,j){const g=[];let q=k;while(q<j&&(isV(t[q])||t[q].neg)){g.push(q);q++}const cm=seqEN(t,q,j,false);
+const b=a=>{const n=[pre(t[g[a]])];let c=a+1;while(c<g.length&&t[g[c]].neg){n.push(pre(t[g[c]]));c++}if(c>=g.length)n.push(...cm);else n.push(b(c));return N('VP',n)};return b(0)}
+const wrapNP=a=>a.length===1?a[0]:N('NP',a);
+function clauseEN(t,i,j){let p=i,wh=null;if(t[p]&&/^W/.test(t[p].pos)){wh=N(t[p].pos==='WP'?'WHNP':'WHADVP',[pre(t[p])]);p++}
+if(t[p]&&t[p].aux&&p+1<j){const r=npEN(t,p+1,j);if(r&&(r[1]>=j||true)){const rest=r[1]<j&&hasV(t,r[1],j)?[vpEN(t,r[1],j)]:seqEN(t,r[1],j,false);const sq=N('SQ',[pre(t[p]),r[0],...rest]);return wh?N('SBARQ',[wh,sq]):sq}}
+let k=p;while(k<j&&!isV(t[k]))k++;if(k>=j){W.push('No verb found: the clause is shown as a fragment.');return N('FRAG',seqEN(t,i,j,true))}
+const sj=seqEN(t,p,k,true),vp=vpEN(t,k,j),kids=[];if(wh&&!sj.length)kids.push(wh);else{if(wh)kids.push(wh);if(sj.length)kids.push(wrapNP(sj))}kids.push(vp);return N('S',kids)}
+function parseEN(t){let e=t.length;while(e>0&&t[e-1].pos==='.')e--;const root=clauseEN(t,0,e);root.children.push(...t.slice(e).map(pre));
+if(!/^(S|SBARQ|SQ)$/.test(root.label)){}if(!hasV(t,0,e)||false){}if(e>0&&t[0].pos==='VBP'||t[0].pos==='VB'&&root.label==='S'&&!root.children.some(c=>c.label==='NP'))root.imp=true;return root}
+/* ---------- Bangla tagger ---------- */
+const B={PRP:Ls('আমি আমাকে আমার আমরা আমাদের তুমি তোমাকে তোমার তোমরা তুই আপনি আপনাকে আপনার সে তাকে তার তারা তাদের তিনি এটি এটা ওটা'),QF:Ls('এক একটি একটা একজন দুই দুটি তিন তিনটি চার পাঁচ কিছু অনেক সব সকল প্রতিটি কয়েকটি'),WQ:Ls('কী কি কে কেন কখন কোথায় কোথা কীভাবে কেমন কত কোন কোনটি'),PSP:Ls('দ্বারা জন্য সাথে সঙ্গে থেকে কাছে মধ্যে ছাড়া পর্যন্ত দিকে উপর নিচে'),CC:Ls('এবং ও আর কিন্তু অথবা বা'),CS:Ls('যে যদি কারণ'),NEG:Ls('না নয় নেই'),RB:Ls('গতকাল আজ আগামীকাল এখন খুব দ্রুত ধীরে সবসময় প্রায়ই কখনো তখন এখানে ওখানে'),JJ:Ls('বুদ্ধিমান কঠিন সুন্দর ভালো ভাল খারাপ বড় ছোট সৎ নতুন পুরোনো সহজ লম্বা'),NNP:Ls('রাহিম রহিম করিম রিনা ঢাকা বাংলাদেশ সুমি')};
+const VS=['খা','পড়','যা','গি','কর','জান','লিখ','লেখ','দেখ','বল','আস','হ','আছ','চল','শুন','ভাব','পাঠ','ধর','থাক'].map(NF),VR=R('^(|ি|ই|ছি|ছ|ছে|ছেন|য়|য়ে|য়েছি|য়েছ|য়েছে|য়েছেন|য়েছিল|য়েছিলাম|য়েছিলেন|েছি|েছ|েছে|েছিল|েছিলাম|েছেন|ে|ো|ব|বে|বো|বেন|ত|তো|তে|তাম|ল|লাম|লে|লেন|ছিল|ছিলাম|য়নি|নি|া|ে)$'),NGR=R('নি$');
+function tagBN(ws){const T=[];ws.forEach((w,i)=>{const p=T[i-1];let pos,u=false,feat='',neg=false,gen=false,cs='',stem='';
+const nm=['PRP','QF','WQ','PSP','CC','CS','RB','JJ','NNP'].find(k=>B[k].has(w));
+if(/^[।?!,;:.]$/.test(w))pos='PUNC';else if(/^\d/.test(w))pos='QF';else if(B.NEG.has(w)){pos='RB';neg=true;feat='negation'}else if(nm)pos=nm==='NNP'?'NNP':nm;
+else{const s=VS.find(s=>w.startsWith(s)&&VR.test(w.slice(s.length)));if(s){pos='VM';stem=s;if(/^(হ|আছ|থাক)$/.test(s)&&p&&p.pos==='VM')pos='VAUX';if(NGR.test(w)){neg=true;feat='negated verb (-নি)'}}
+else{pos='NN';if(/(টি|টা)$/.test(w))feat='definite -'+w.slice(-2);else if(/(গুলো|গুলি)$/.test(w))feat='plural';else if(/কে$/.test(w)){feat='objective -কে';cs='acc'}else if(/ের$/.test(w)){feat='genitive -ের';gen=true;cs='gen'}else if(/র$/.test(w)){feat='possible genitive -র (uncertain)';gen=true;cs='gen';u=true}else if(/(তে|ে)$/.test(w)){feat='locative/instrumental -ে (uncertain)';cs='loc';u=!/স্কুলে|ঘরে|বাড়িতে/.test(w)}else u=true}}
+const lemma=stem?stem+'-':pos==='NN'?w.replace(R('(টির|টার|টি|টা|গুলো|গুলি|দের|কে|ের|তে)$'),''):w;
+T.push({text:w,index:i,pos,aux:false,neg,unsure:u,lemma,feat,gen,case:cs,stem})});return T}
+/* ---------- Bangla parser (SOV, postpositions) ---------- */
+function npBN(t,p,j){let q=p;const m=[];while(q<j&&/^(QF|JJ)$/.test(t[q].pos))m.push(pre(t[q++]));
+if(q>=j||!/^(NN|NNP|PRP|WQ)$/.test(t[q].pos))return m.length?[N(m.every(x=>x.label==='JJ')?'ADJP':'NP',m),q]:null;
+let h=N('NP',[...m,pre(t[q])]);const g=t[q].gen;q++;if(g&&q<j){const r=npBN(t,q,j);if(r&&r[0].label==='NP'){h=N('NP',[h,r[0]]);q=r[1]}}return[h,q]}
+function seqBN(t,i,j){const o=[];let p=i;while(p<j){const r=npBN(t,p,j);if(r){p=r[1];o.push(p<j&&t[p].pos==='PSP'?N('PP',[r[0],pre(t[p++])]):r[0]);continue}
+o.push(t[p].pos==='RB'&&!t[p].neg?N('ADVP',[pre(t[p])]):pre(t[p]));p++}return o}
+function clauseBN(t,i,j){let c=-1;for(let q=i;q<j;q++)if(t[q].pos==='CS'){c=q;break}const e=c<0?j:c;let q=e;while(q>i&&t[q-1].neg&&t[q-1].pos==='RB')q--;
+const ng=t.slice(q,e).map(pre);let v=q;while(v>i&&t[v-1].pos==='VAUX')v--;while(v>i&&t[v-1].pos==='VM')v--;
+const cl=t.slice(v,q).map(pre),ar=seqBN(t,i,v),sb=c>=0?N('SBAR',[pre(t[c]),clauseBN(t,c+1,j)]):null,si=ar.findIndex(x=>x.label==='NP'||x.label==='WHNP');
+if(cl.length){const sj=si>=0?ar.splice(si,1):[];const last=ar[ar.length-1];if(last&&last.label==='NP'&&last.children.length===1&&/^(কর|দ)$/.test(t[v].stem||''))last.lvc=true;
+return N('S',[...sj,N('VP',[...ar,...cl,...ng,...(sb?[sb]:[])])])}
+if(si>=0&&ar.length>=1){const sj=ar.splice(si,1);if(ar.length){W.push('No overt verb: treated as a zero-copula sentence (Bangla often omits "to be" in the present).');return N('S',[...sj,...ar])}}
+W.push('No verb found: the clause is shown as a fragment.');return N('FRAG',ar)}
+function parseBN(t){let e=t.length;while(e>0&&t[e-1].pos==='PUNC')e--;const r=clauseBN(t,0,e);r.children.push(...t.slice(e).map(pre));return r}
+/* ---------- dependencies ---------- */
+function mkDeps(root,tk){const D=tk.map(()=>({head:-1,rel:'dep'})),VV=/^(VB|MD|VM)/;
+const rel=(L,ch,i,c,hd)=>{const l=ch.label;if(l==='.'||l==='PUNC')return'punct';
+if(L==='NP')return/^(DT)$/.test(l)?'det':l==='JJ'?'amod':/^(QF|CD)$/.test(l)?'nummod':l==='NP'||l==='PP'?'nmod':'compound';
+if(L==='PP')return'case';if(L==='SBAR')return'mark';
+if(ch.lvc)return'compound:lvc';
+const auxy=l==='VAUX'||l==='MD'||/^VB/.test(l);
+if(L==='VP'){if(l==='VM')return'compound';if(auxy)return'aux';if(l==='NP')return tk[hd[i]]&&tk[hd[i]].case==='loc'?'obl':'obj';if(l==='PP')return'obl';if(/^(RB|ADVP|WHADVP)$/.test(l))return'advmod';if(l==='ADJP')return'xcomp';if(l==='SBAR')return'ccomp';if(l==='WHNP')return'obj';return l==='CC'?'conj':'dep'}
+if(/^(NP|WHNP)$/.test(l)){if(l==='WHNP')return L==='SBARQ'||ch.children.length&&c.some(x=>x.label==='NP')?'obj':'nsubj';return c.findIndex(x=>x.label==='NP')===i?'nsubj':'obj'}
+if(auxy)return'aux';if(/^(RB|ADVP|WHADVP)$/.test(l))return'advmod';if(l==='PP')return'obl';if(l==='SBAR')return'ccomp';if(l==='ADJP')return'xcomp';if(l==='VP')return'dep';return l==='CC'?'conj':'dep'};
+function go(n){if(n.word!==undefined)return n.idx;const c=n.children,h=c.map(go),L=n.label,f=p=>c.findIndex(p);let hc;
+if(L==='NP'){const lastNP=c[c.length-1].label==='NP';hc=lastNP?c.length-1:f(x=>x.label==='NP');if(hc<0){for(let i=c.length-1;i>=0;i--)if(/^(NN|PRP|WQ)/.test(c[i].label)){hc=i;break}}if(hc<0)hc=c.length-1}
+else if(L==='PP')hc=Math.max(f(x=>/^(NP)$/.test(x.label)),0);else if(/^(ADJP|ADVP|WHNP|WHADVP)$/.test(L))hc=0;
+else if(L==='VP'){hc=f(x=>x.label==='VP');if(hc<0)hc=f(x=>VV.test(x.label));if(hc<0)hc=0}
+else{hc=[f(x=>x.label==='VP'),f(x=>x.label==='SQ'),f(x=>x.label==='S'),L==='S'?f(x=>x.label==='ADJP'):-1,f(x=>VV.test(x.label)),f(x=>x.label==='NP')].find(v=>v>=0);if(hc===undefined)hc=0}
+c.forEach((ch,i)=>{if(i!==hc)D[h[i]]={head:h[hc],rel:rel(L,ch,i,c,h)}});return h[hc]}
+const r=go(root);D[r]={head:-1,rel:'root'};
+D.forEach((d,i)=>{if(d.rel==='nsubj'&&tk[d.head]&&tk[d.head].pos==='VBN'&&tk.some((x,j)=>D[j].head===d.head&&D[j].rel==='aux'&&/^(is|are|was|were|be|been)$/i.test(x.text)))d.rel='nsubj:pass'});return D}
+/* ---------- Minimalist Program view (Merge, bare phrase structure) ---------- */
+const GM={DP:['Determiner phrase','নির্ধারক পদগুচ্ছ'],TP:['Tense phrase (clause core)','কালবাচক পদগুচ্ছ (বাক্যের কেন্দ্র)'],CP:['Complementizer phrase (full clause)','কমপ্লিমেন্টাইজার পদগুচ্ছ (পূর্ণ বাক্য)'],vP:['Light-verb phrase (introduces the agent)','লঘু-ক্রিয়া পদগুচ্ছ (কর্তা আনে)'],AP:['Adjective phrase','বিশেষণ পদগুচ্ছ'],AdvP:['Adverb phrase','ক্রিয়া-বিশেষণ পদগুচ্ছ'],NegP:['Negation phrase','নঞর্থক পদগুচ্ছ'],ProgP:['Progressive phrase','চলমান পদগুচ্ছ'],PassP:['Passive phrase','কর্মবাচ্য পদগুচ্ছ'],PerfP:['Perfect phrase','পুরাঘটিত পদগুচ্ছ'],AuxP:['Auxiliary phrase','সহায়ক ক্রিয়া পদগুচ্ছ'],FragP:['Fragment','খণ্ডিত অংশ'],D:['Determiner head','নির্ধারক (শীর্ষ)'],T:['Tense head','কাল (শীর্ষ)'],C:['Complementizer head','কমপ্লিমেন্টাইজার (শীর্ষ)'],v:['Light-verb head','লঘু ক্রিয়া (শীর্ষ)'],V:['Verb head','ক্রিয়া (শীর্ষ)'],N:['Noun head','বিশেষ্য (শীর্ষ)'],A:['Adjective head','বিশেষণ (শীর্ষ)'],Adv:['Adverb head','ক্রিয়া-বিশেষণ (শীর্ষ)'],P:['Preposition / postposition head','অনুসর্গ (শীর্ষ)'],Neg:['Negation head','নঞর্থক (শীর্ষ)'],Prog:['Progressive head','চলমান (শীর্ষ)'],Pass:['Passive head','কর্মবাচ্য (শীর্ষ)'],Perf:['Perfect head','পুরাঘটিত (শীর্ষ)'],Aux:['Auxiliary head','সহায়ক (শীর্ষ)'],Pro:['Pronoun','সর্বনাম'],Adj:['Adjective','বিশেষণ'],Conj:['Conjunction','সংযোজক'],Num:['Number','সংখ্যা'],Q:['Quantifier','পরিমাণবাচক'],Wh:['Wh-word','প্রশ্নসূচক শব্দ'],AdjP:['Adjective phrase','বিশেষণ পদগুচ্ছ'],SBar:['Subordinate clause','অধীন বাক্য']};
+const ROLE={spec:['Specifier: merged with the intermediate projection (second Merge)','বিশেষক: মধ্যবর্তী স্তরের সঙ্গে দ্বিতীয় Merge'],comp:['Complement: first Merge with the head','পূরক: শীর্ষের সঙ্গে প্রথম Merge'],head:['Head: it projects the label of the phrase','শীর্ষ: এটিই পদগুচ্ছের লেবেল নির্ধারণ করে'],adj:['Adjunct: adjoined modifier','অ্যাডজাঙ্কট: যুক্ত বিশেষক'],copy:['Lower copy left by movement (Internal Merge); not pronounced here','চলনের পর রেখে যাওয়া নিম্ন প্রতিলিপি (Internal Merge); এখানে উচ্চারিত নয়']};
+const gl=k=>GM[k]||GL[k]||(k.endsWith('′')?['Intermediate projection of '+k.slice(0,-1),k.slice(0,-1)+'-এর মধ্যবর্তী স্তর']:[k,k]);
+const MINT=['Built bottom-up by Merge: head + complement, then + specifier. Labels come from heads; X′ levels are drawn only for readability. ⟨…⟩ is a lower copy left by movement (Internal Merge), linked to its landing site by matching subscripts. English is drawn head-initial, Bangla head-final (T, v, V, P follow their complements). Simplified: verb raising and affix hopping are not drawn (tense appears as [PAST]/[PRES] on T), and punctuation is omitted.','Merge-এর মাধ্যমে নিচ থেকে উপরে গঠিত: শীর্ষ + পূরক, তারপর + বিশেষক। লেবেল শীর্ষ থেকে আসে; X′ স্তর শুধু পড়ার সুবিধার জন্য। ⟨…⟩ হলো চলনের (Internal Merge) পর রেখে যাওয়া নিম্ন প্রতিলিপি, একই সাবস্ক্রিপ্ট দিয়ে গন্তব্যের সঙ্গে যুক্ত। ইংরেজি শীর্ষ-আদি, বাংলা শীর্ষ-অন্ত। সরলীকরণ: ক্রিয়ার চলন ও affix hopping দেখানো হয়নি এবং যতিচিহ্ন বাদ।'];
+function pinfo(vp){const auxs=[],vs=[],negs=[],comps=[];let cur=vp;while(cur){const nx=cur.children.find(x=>x.label==='VP');cur.children.forEach(k=>{if(k===nx)return;if(k.word!==undefined&&/^(VB|MD)/.test(k.label))(nx?auxs:vs).push(k);else if(k.word!==undefined&&k.label==='RB')negs.push(k);else comps.push(k)});cur=nx}return{auxs,negs,comps,main:vs[0]||null}}
+const BPAST=R('(ছিল|ছিলাম|লাম|লেন|লে|ল)$'),BFUT=R('(বে|বো|বেন|ব)$'),BPART=R('া$'),BHO=R('^হ');
+function toMin(r){const bn=r.language==='bn',SUB=['ᵢ','ⱼ','ₖ','ₗ'];let ixn=0;
+const lf=(c,w,i=-1,x)=>({label:c,word:w,idx:i,children:[],...x}),hd=(n,c)=>lf(c,n.word,n.idx,{unsure:n.unsure});
+const mk=(cat,sp,h,cm,fin)=>{h.role='head';if(sp&&!sp.role)sp.role='spec';if(cm&&!cm.role)cm.role='comp';if(!cm)return N(cat+'P',sp?[sp,h]:[h]);const b=fin?[cm,h]:[h,cm];return sp?N(cat+'P',[sp,N(cat+'′',b)]):N(cat+'P',b)};
+const adj=(b,a,left)=>{a.role='adj';return N(b.label,left?[a,b]:[b,a])};
+const cpy=(o,cat,ix)=>lf(cat,'⟨'+words(o)+'⟩',-1,{role:'copy',ix});
+const npPart=c=>{const ns=c.filter(x=>/^NN/.test(x.label)||/^(PRP|WQ)$/.test(x.label)),js=c.filter(x=>x.label==='JJ');let b=N('NP',[hd(ns[ns.length-1]||c[c.length-1],'N')]);ns.slice(0,-1).reverse().forEach(x=>b=adj(b,N('NP',[hd(x,'N')]),true));js.reverse().forEach(x=>b=adj(b,N('AP',[hd(x,'A')]),true));return b};
+const dp=n=>{const c=n.children;if(n.label==='WHNP'||(c.length===1&&c[0].label==='PRP'))return N('DP',[hd(c[0],'D')]);
+if(c[0].label==='NP'&&c[1]&&c[1].label==='NP')return mk('D',dp(c[0]),lf('D','∅'),npPart(c[1].children),false);
+if(c[0].label==='NP'&&c[1]&&c[1].label==='PP')return adj(dp(c[0]),pp(c[1]),false);
+const dt=c.find(x=>/^(DT|QF|CD)$/.test(x.label));return mk('D',null,dt?hd(dt,'D'):lf('D','∅'),npPart(c),false)};
+const pp=n=>{const c=n.children,P=c.find(x=>/^(IN|TO|PSP)$/.test(x.label)),o=c.find(x=>x!==P);return mk('P',null,hd(P,'P'),/^(NP|WHNP)$/.test(o.label)?dp(o):cv(o),bn)};
+const cv=n=>{const L=n.label;if(/^(NP|WHNP)$/.test(L))return dp(n);if(L==='PP')return pp(n);if(L==='ADJP')return N('AP',[hd(n.children[0],'A')]);if(/^(ADVP|WHADVP)$/.test(L))return N('AdvP',[hd(n.children[0],'Adv')]);if(L==='SBAR')return cp(n.children[1],n.children[0]);
+if(n.word!==undefined)return/^(\.|PUNC)$/.test(L)?null:hd(n,L);return N(L,n.children.map(cv).filter(Boolean))};
+function cp(n,cmp){let wh=null,q=n;if(n.label==='SBARQ'){wh=n.children.find(x=>/^WH/.test(x.label));q=n.children.find(x=>/^(SQ|S)$/.test(x.label))||n}
+if(q.label==='FRAG')return N('FragP',q.children.map(cv).filter(Boolean));
+const ch=q.children.filter(x=>!/^(\.|PUNC)$/.test(x.label)),inv=q.label==='SQ',lead=inv?ch.shift():null,sj=ch.find(x=>/^(NP|WHNP)$/.test(x.label)),vp=ch.find(x=>x.label==='VP'),pr=ch.filter(x=>x!==sj&&x!==vp),
+whO=wh&&wh.label==='WHNP'&&wh!==sj?wh:null,wix=whO?SUB[ixn++]:'',pro=()=>N('DP',[lf('D',bn?'pro':'∅')]);
+const six=sj&&vp?SUB[ixn++]:'',sjd=sj?dp(sj):pro(),sC=sj?cpy(sj,'DP',six):pro();if(sj&&vp)sjd.ix=six;let tp;
+if(bn){let tH,inner;
+if(vp){const vms=vp.children.filter(x=>x.label==='VM'),vx=vp.children.filter(x=>x.label==='VAUX'),ng=vp.children.filter(x=>x.label==='RB'),ar=vp.children.filter(x=>x.word===undefined),main=vms[vms.length-1]||vx[0],w=(vx[0]||main).word,
+tense=BPAST.test(w)?'PAST':BFUT.test(w)?'FUT':'PRES',pass=vx.length&&vms.length&&BPART.test(main.word)&&BHO.test(vx[0].word),sbs=ar.filter(x=>x.label==='SBAR'),dps=ar.filter(x=>x.label!=='SBAR').map(cv).filter(Boolean);
+if(pass)dps.push(sC);let b=mk('V',null,hd(main,'V'),dps[dps.length-1],true);dps.slice(0,-1).reverse().forEach(x=>b=adj(b,x,true));sbs.forEach(x=>b=adj(b,cv(x),false));
+inner=mk('v',pass?null:sC,lf('v','∅'),b,true);if(ng.length)inner=mk('Neg',null,hd(ng[0],'Neg'),inner,true);tH=vx.length?hd(vx[0],'T'):lf('T','['+tense+']')}
+else{inner=pr.length?cv(pr[0]):lf('AP','∅');tH=lf('T','∅[PRES]')}
+tp=mk('T',sjd,tH,inner,true)}
+else{const P=vp?pinfo(vp):{auxs:[],negs:[],comps:[],main:null};let auxs=P.auxs,main=P.main;if(inv){if(vp)auxs=[lead,...auxs];else main=lead}if(!main)throw 'no main verb';
+const cop=!auxs.length&&/^(is|are|was|were|am|be|been|being)$/i.test(main.word),cl=P.comps.concat(pr).map(cv).filter(Boolean),pass=auxs.some(a=>/^(is|are|was|were|be|been|being|am)$/i.test(a.word))&&main.label==='VBN',
+f0=auxs[0]||main,hix=inv?SUB[ixn++]:'';
+if(whO)cl.unshift(cpy(whO,'DP',wix));if(pass)cl.unshift(sC);
+let inner;if(cop){inner=cl[0]||lf('AP','∅');cl.slice(1).forEach(x=>inner=adj(inner,x,false))}
+else{let b=mk('V',null,hd(main,'V'),cl[0],false);cl.slice(1).forEach(x=>b=adj(b,x,false));inner=mk('v',pass?null:sC,lf('v','∅'),b,false)}
+for(let k=auxs.length-1;k>=0;k--){const a=auxs[k],nt=(auxs[k+1]||main).label,kd=nt==='VBG'?'Prog':nt==='VBN'?(/^(have|has|had)$/i.test(a.word)?'Perf':'Pass'):null;
+if(k===0){if(kd)inner=mk(kd,null,lf(kd,'∅['+(kd==='Prog'?'-ing':'-en')+']'),inner,false)}else inner=mk(kd||'Aux',null,hd(a,kd||'Aux'),inner,false)}
+if(P.negs.length)inner=mk('Neg',null,hd(P.negs[0],'Neg'),inner,false);
+const tH=inv?cpy(f0,'T',hix):auxs.length?hd(auxs[0],'T'):cop?hd(main,'T'):lf('T','['+(f0.label==='VBD'?'PAST':'PRES')+']');
+tp=mk('T',sjd,tH,inner,false);if(inv)lead.hix=hix}
+const Q=leavesOf(n).some(x=>/^(WP|WRB|WQ)$/.test(x.label))||inv,cH=inv?hd(lead,'C'):cmp?hd(cmp,'C'):lf('C',Q?'[+Q]':'∅');if(inv)cH.ix=lead.hix;
+const wd=wh?(whO?Object.assign(dp(wh),{ix:wix}):cv(wh)):null;return mk('C',wd,cH,tp,false)}
+const m=cp(r.tree,null);let id=0;(function f(n,p){n.id=id++;n.parent=p;n.children.forEach(c=>f(c,n))})(m,null);return m}
+/* ---------- strictly binary tree ---------- */
+const SIMP={DT:'D',NN:'N',NNS:'N',NNP:'N',NNPS:'N',PRP:'Pro',VB:'V',VBD:'V',VBG:'V',VBN:'V',VBP:'V',VBZ:'V',MD:'Aux',VM:'V',VAUX:'Aux',JJ:'Adj',RB:'Adv',IN:'P',TO:'P',PSP:'P',CC:'Conj',CD:'Num',QF:'Q',WP:'Wh',WRB:'Wh',WQ:'Wh',CS:'C',ADJP:'AdjP',ADVP:'AdvP',WHNP:'NP',WHADVP:'AdvP',SBAR:'SBar',SQ:'S',SBARQ:'S'};
+function toBin(r){const sm=l=>SIMP[l]||l,np=x=>!/^(\.|PUNC)$/.test(x.label),
+mkn=(lab,k)=>{if(k.length<=2)return{label:lab,children:k};const last=k[k.length-1];return/^(PP|AdvP|SBar)$/.test(last.label)?{label:lab,children:[mkn(lab,k.slice(0,-1)),last]}:{label:lab,children:[k[0],mkn(lab,k.slice(1))]}},
+b=n=>{if(n.word!==undefined)return{label:sm(n.label),cat:n.label,word:n.word,idx:n.idx,children:[],unsure:n.unsure};
+const k=n.children.filter(np).map(b),lab=sm(n.label);
+if(k.length===1){const c=k[0];return c.word!==undefined?{label:lab,cat:n.label,word:c.word,idx:c.idx,children:[],unsure:c.unsure}:{...c,label:lab}}
+return mkn(lab,k)},t=b(r.tree);let id=0;(function f(n,p){n.id=id++;n.parent=p;n.children.forEach(c=>f(c,n))})(t,null);return t}
+const binOK=n=>n.word!==undefined||(n.children.length===2&&n.children.every(binOK));
+/* ---------- validation, analysis ---------- */
+const leavesOf=n=>n.word!==undefined?[n]:n.children.flatMap(leavesOf),words=n=>leavesOf(n).map(x=>x.word).join(' ');
+function validate(root,tk){const ids=leavesOf(root).map(x=>x.idx);if(ids.length!==tk.length||ids.some((v,i)=>v!==i)){W.push('Tree validation failed: leaf order differs from token order.');return false}return true}
+function analyse(r){let m=r.tree;while(/^(SBARQ)$/.test(m.label)){m=m.children.find(c=>/^(SQ|S)$/.test(c.label))||m;if(m===r.tree)break}
+const ch=m.children,sj=ch.find(c=>/^(NP|WHNP)$/.test(c.label)),pr=ch.filter(c=>c!==sj&&!/^(\.|PUNC|WHNP|WHADVP)$/.test(c.label)),D=r.dependencies,tk=r.tokens,rt=D.findIndex(d=>d.rel==='root'),
+pick=f=>tk.filter((_,i)=>f(D[i].rel)).map(x=>x.text),last=tk[tk.length-1]&&tk[tk.length-1].text,q=/[?]$/.test(r.sentence.trim())||tk.some(x=>/^(WP|WRB|WQ)$/.test(x.pos))||/^(SQ|SBARQ)$/.test(r.tree.label);
+const type=/!$/.test(r.sentence.trim())?'exclamatory':q?'interrogative':r.tree.imp?'imperative':'declarative';
+return{type,subj:sj?words(sj):'',pred:pr.map(words).join(' '),root:rt>=0?tk[rt].text:'',objs:pick(x=>/^(obj|obl|ccomp|xcomp)$/.test(x)),mods:pick(x=>/^(amod|advmod|nummod)$/.test(x)),neg:tk.some(x=>x.neg)}}
+function explain(r,l){const a=r.an,Q=s=>'“'+s+'”',L=(x,y)=>l==='bn'?y:x;
+return l==='bn'?`এটি একটি ${TY[a.type][1]} বাক্য। উদ্দেশ্য (কর্তা): ${a.subj?Q(a.subj):'স্পষ্ট নয়'}। বিধেয়: ${a.pred?Q(a.pred):'স্পষ্ট নয়'}। মূল ক্রিয়া/রুট: ${a.root?Q(a.root):'—'}।${a.objs.length?' কর্ম ও অন্যান্য পূরক: '+a.objs.map(Q).join(', ')+'।':''}${a.mods.length?' বিশেষণ/ক্রিয়া-বিশেষণ: '+a.mods.map(Q).join(', ')+'।':''}${a.neg?' বাক্যটি নঞর্থক।':''} এটি নিয়মভিত্তিক অনুমান; প্রশিক্ষিত মডেলের ফল নয়, তাই ভুল থাকতে পারে।`
+:`This is a ${a.type} sentence. Subject: ${a.subj?Q(a.subj):'not identified'}. Predicate: ${a.pred?Q(a.pred):'not identified'}. Root predicate: ${a.root?Q(a.root):'—'}.${a.objs.length?' Objects and complements: '+a.objs.map(Q).join(', ')+'.':''}${a.mods.length?' Modifiers: '+a.mods.map(Q).join(', ')+'.':''}${a.neg?' The sentence is negated.':''} This is a rule-based heuristic analysis, not trained-model output, so errors are possible.`}
+/* ---------- main parse ---------- */
+function parse(s,lang){W=[];s=NF(s.trim());const lg=lang==='auto'?detect(s):lang;if(!s)throw'Please enter a sentence.';if(!lg)throw'No English or Bangla letters found. Type a sentence in English or বাংলা.';
+if(s.length>400)throw'The sentence is too long (limit: 400 characters).';
+if(lang==='en'&&detect(s)==='bn')W.push('Input looks like Bangla but English was selected.');if(lang==='bn'&&detect(s)==='en')W.push('Input looks like English but Bangla was selected.');
+const ws=lg==='bn'?tokBN(s):tokEN(s),tk=lg==='bn'?tagBN(ws):tagEN(ws);if(!tk.some(x=>!/^(\.|PUNC)$/.test(x.pos)))throw'Add at least one word.';
+const tree=lg==='bn'?parseBN(tk):parseEN(tk);let id=0;(function f(n,p){n.id=id++;n.parent=p;n.children.forEach(c=>f(c,n))})(tree,null);validate(tree,tk);
+const dep=mkDeps(tree,tk),u=tk.filter(x=>x.unsure).length;if(u)W.push(u+' word(s) were tagged by guesswork (dashed nodes).');
+const r={language:lg,parserType:'rule-based',sentence:s,tokens:tk,tree,dependencies:dep,warnings:W};r.an=analyse(r);try{r.mtree=toMin(r)}catch(e){r.mtree=null}try{r.btree=toBin(r)}catch(e){r.btree=null}return r}
+/* ---------- rendering ---------- */
+const bnT=s=>/[\u0980-\u09FF]/.test(s),wW=w=>[...w].length*(bnT(w)?8:8.4)+18,lW=l=>l.length*8+20;
+const css=()=>{const d=document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches),c=d?{i:'#e6efed',l:'#5b7377',s:'#9db0ff',p:'#4fd1c5',o:'#e0b05c',b:'#172427'}:{i:'#17262b',l:'#8fa6a1',s:'#2f3d8f',p:'#0b6e6e',o:'#8a5a00',b:'#fbfcfa'};
+return`text{font:13px "Hanken Grotesk","Noto Sans Bengali",sans-serif;fill:${c.i};text-anchor:middle}.w{font:600 15px "Noto Sans Bengali","Hanken Grotesk",sans-serif}.ed{stroke:${c.l};fill:none;stroke-width:1.3}.nd rect{fill:${c.b};stroke-width:1.6}.kS rect{stroke:${c.s}}.kP rect{stroke:${c.p}}.kT rect{stroke:${c.o}}.nd{cursor:pointer}.sel rect{fill:${c.p}44;stroke-width:3.2}.u rect{stroke-dasharray:3 2}.cp text{opacity:.65;font-style:italic}.cp rect{stroke-dasharray:2 3}.pl text{font:600 15px "Hanken Grotesk","Noto Sans Bengali",sans-serif}.pl.sel text{fill:${c.p}}.pl{outline:none}.rl{font-size:11px;fill:${c.p}}.ar{fill:${c.l}}`};
+let SEL=null,Z=1,R0=null;
+function drawTree(root,sid='ts',plain=false){const st={x:16,m:0};(function lay(n,d){n.d=d;const k=n.collapsed?[]:n.children;if(!k.length){const w=n.word!==undefined?Math.max(wW(n.word),lW(n.label)):lW(n.label)+26;n.x=st.x+w/2;st.x+=w+8}else{k.forEach(c=>lay(c,d+1));n.x=(k[0].x+k[k.length-1].x)/2}st.m=Math.max(st.m,d)})(root,0);
+let E=[],G=[];const y=n=>n.d*64+26,wy=st.m*64+72;(function dr(n){const k=n.collapsed?[]:n.children;k.forEach(c=>{E.push(`<path class="ed" d="M${n.x} ${y(n)+(plain?8:13)}L${c.x} ${y(c)-(plain?15:13)}"/>`);dr(c)});
+const cls=(n.parent?(n.word!==undefined?'kT':'kP'):'kS')+(SEL===n?' sel':'')+(n.unsure?' u':'')+(n.role==='copy'?' cp':'')+(plain?' pl':''),w=Math.max(lW(n.label),n.collapsed?lW(n.label)+26:0);
+let s=`<g class="nd ${cls}" data-id="${n.id}" tabindex="0" role="button" aria-label="${esc(n.label)} ${esc(words(n))}">${plain?'':`<rect x="${n.x-w/2}" y="${y(n)-13}" width="${w}" height="26" rx="7"/>`}<text x="${n.x}" y="${y(n)+4}">${esc(n.label)}${n.ix||''}${n.collapsed?' ▸':''}</text>`;
+if(plain&&n.word!==undefined)s+=`</g><path class="ed" d="M${n.x} ${y(n)+8}L${n.x} ${wy-15}"/><text class="w" x="${n.x}" y="${wy}">${esc(n.word)}</text>`;else if(n.word!==undefined)s+=`</g><path class="ed" d="M${n.x} ${y(n)+13}L${n.x} ${y(n)+24}" stroke-dasharray="2 2"/><text class="w" x="${n.x}" y="${y(n)+42}">${esc(n.word)}</text>`;else if(n.collapsed)s+=`</g><text class="w" x="${n.x}" y="${y(n)+32}">${esc(words(n))}</text>`;else s+='</g>';G.push(s);n.children.length&&!n.collapsed||0})(root);
+const Wd=Math.max(st.x+8,200),H=st.m*64+110;return`<svg xmlns="http://www.w3.org/2000/svg" id="${sid}" viewBox="0 0 ${Wd} ${H}" width="${Wd*Z}" height="${H*Z}" role="img" aria-label="Constituency tree"><style>${css()}</style>${E.join('')}${G.join('')}</svg>`}
+function drawDep(r){const tk=r.tokens,D=r.dependencies,X=[];let x=16;tk.forEach(t=>{const w=Math.max(wW(t.text),80);X.push(x+w/2);x+=w+14});let mh=40;D.forEach((d,i)=>{if(d.head>=0)mh=Math.max(mh,26+Math.abs(i-d.head)*20)});const base=mh+60,H=base+44;let s='';
+D.forEach((d,i)=>{const ax=X[i],y0=base-16;if(d.head<0){s+=`<path class="ed" d="M${ax} ${y0-mh-24}L${ax} ${y0-4}"/><text class="rl" x="${ax+16}" y="${y0-mh-12}">root</text>`;s+=`<path class="ar" d="M${ax-4} ${y0-9}l4 7 4-7z"/>`;return}
+const hx=X[d.head],h=26+Math.abs(i-d.head)*20;s+=`<path class="ed" d="M${hx} ${y0}C${hx} ${y0-h},${ax} ${y0-h},${ax} ${y0-5}"/><path class="ar" d="M${ax-4} ${y0-9}l4 7 4-7z"/><text class="rl" x="${(hx+ax)/2}" y="${y0-h*.75-3}">${esc(d.rel)}</text>`});
+tk.forEach((t,i)=>s+=`<text class="w" x="${X[i]}" y="${base+6}">${esc(t.text)}</text><text x="${X[i]}" y="${base+24}" style="font-size:11px;opacity:.7">${esc(t.pos)}</text>`);
+return`<svg xmlns="http://www.w3.org/2000/svg" id="ds" viewBox="0 0 ${x+8} ${H}" width="${(x+8)*Z}" height="${H*Z}" role="img" aria-label="Dependency tree"><style>${css()}</style>${s}</svg>`}
+const bra=(n,i='')=>n.word!==undefined?`(${n.label} ${n.word})`:`(${n.label}`+n.children.map(c=>'\n'+i+'  '+bra(c,i+'  ')).join('')+')';
+const clean=n=>n.word!==undefined?{label:n.label,word:n.word,index:n.idx}:{label:n.label,children:n.children.map(clean)};
+function toJSON(r){return JSON.stringify({language:r.language,parserType:r.parserType,sentence:r.sentence,tokens:r.tokens.map(t=>({text:t.text,index:t.index,pos:t.pos,lemma:t.lemma,uncertain:!!t.unsure})),constituencyTree:clean(r.tree),minimalistTree:r.mtree?clean(r.mtree):null,binaryTree:r.btree?clean(r.btree):null,dependencies:r.dependencies.map((d,i)=>({index:i,word:r.tokens[i].text,head:d.head,relation:d.rel})),analysis:r.an,warnings:r.warnings},null,2)}
+function fnOf(n,l){if(n.role&&ROLE[n.role])return ROLE[n.role][l==='bn'?1:0];const P=n.parent,t=(a,b)=>l==='bn'?b:a;if(!P)return t('Whole sentence (root)','সম্পূর্ণ বাক্য (মূল নোড)');if(n.word!==undefined)return t('Word-level category','শব্দশ্রেণি');
+if(n.label==='NP'||n.label==='WHNP')return P.children.find(c=>c.label==='NP')===n&&/^(S|SQ|SBARQ)$/.test(P.label)?t('Subject: what the sentence is about','কর্তা: বাক্য যার সম্পর্কে'):/^(VP|SQ|S)$/.test(P.label)?t('Object or complement of the verb','ক্রিয়ার কর্ম বা পূরক'):t('Modifier inside a larger phrase','বড় পদগুচ্ছের অংশ');
+return({VP:['Predicate: what the subject does or is','বিধেয়: কর্তা কী করে বা কেমন'],PP:['Adjunct: adds place, time, agent or direction','অতিরিক্ত তথ্য: স্থান, কাল, কারক'],SBAR:['Embedded (subordinate) clause','বাক্যের ভেতরের অধীন বাক্য'],ADJP:['Adjective phrase: modifier or predicate complement','বিশেষণ: বিশেষ্যের গুণ বা পূরক'],ADVP:['Adverbial modifier','ক্রিয়া-বিশেষণ পদ'],SQ:['Question clause with inverted order','প্রশ্নবাচক বাক্যাংশ'],S:['Clause','বাক্যাংশ']}[n.label]||['Phrase','পদগুচ্ছ'])[l==='bn'?1:0]}
+function detail(n){const l=$('#xl').value,g=gl(n.cat||n.label),P=n.parent;
+return`<h3>${esc(n.label)}</h3><p><b>${g[0]}</b><br>${g[1]}</p><p><b>${l==='bn'?'ভূমিকা':'Function'}:</b> ${fnOf(n,l)}</p><p><b>${l==='bn'?'শব্দ':'Words'}:</b> ${esc(words(n))}</p><p><b>${l==='bn'?'অভিভাবক নোড':'Parent'}:</b> ${P?esc(P.label):'—'}<br><b>${l==='bn'?'সন্তান নোড':'Children'}:</b> ${n.children.map(c=>`<span class="chip">${esc(c.label)}</span>`).join('')||'—'}</p><p><b>${l==='bn'?'কেন এখানে':'Why here'}:</b> ${l==='bn'?`এর শব্দগুলো একসঙ্গে একটি ${g[1]} হিসেবে কাজ করে${P?' এবং '+esc(P.label)+'-এর অংশ':''}।`:`Its words behave as one ${g[0].toLowerCase()}${P?' and attach under '+esc(P.label):''}.`}${n.unsure?`<br><i>${l==='bn'?'এই শব্দের ট্যাগ অনুমাননির্ভর।':'The tag for this word is a low-confidence guess.'}</i>`:''}</p>${n.word===undefined?`<button id="tg">${n.collapsed?'Expand':'Collapse'} branch</button>`:''}`}
+let RES=null;
+function show(r){RES=r;const m=$('#md').value,l=$('#xl').value,t=r.tokens;
+const used=new Set();t.forEach((x,i)=>{used.add(r.dependencies[i].rel);used.add(x.pos)});r.tree&&(function f(n){used.add(n.label);n.children.forEach(f)})(r.tree);
+const lg=[...used].filter(k=>GL[k]).map(k=>`<span><b>${esc(k)}</b> ${GL[k][l==='bn'?1:0]}</span>`).join(''),dl=[...new Set(r.dependencies.map(d=>d.rel))].map(k=>`<span><b>${k}</b> ${(DR[k]||DR.dep)[l==='bn'?1:0]}</span>`).join('');
+$('#out').innerHTML=`<div class="ban"><b>Rule-based heuristic parse.</b> Not a trained model: expect errors on unusual or complex sentences. ${r.warnings.map(esc).join(' ')}</div>
+<div class="tb"><b lang="${r.language}">${esc(r.sentence)}</b><span class="chip">${r.language==='bn'?'বাংলা':'English'}</span><button id="zo" aria-label="Zoom out">−</button><button id="zi" aria-label="Zoom in">+</button><button id="zr">Fit</button><select id="dlf" aria-label="Download format"><option value="1">SVG image</option><option value="2">PNG image</option><option value="3">JSON data</option><option value="4">Bracketed text</option><option value="7">Report (HTML, printable)</option></select><button id="dlb" class="p">Download</button></div>
+<div id="cv" ${/^(d|m|b)$/.test(m)?'hidden':''}><div class="stage"><div class="sc" id="sc">${drawTree(r.tree)}</div><aside id="det" class="card noprint">Select a node to inspect it.</aside></div><div class="lg" style="margin-top:8px"><b>Legend:</b> ${lg}</div></div>
+<div id="bv" ${/^(b|all)$/.test(m)?'':'hidden'}><h2>${l==='bn'?'দ্বিশাখা বৃক্ষ':'Binary tree'}</h2><div class="stage"><div class="sc" id="sb">${r.btree?drawTree(r.btree,'bs',true):'<p style="padding:12px">Binary tree unavailable.</p>'}</div><aside id="db" class="card noprint">Select a node to inspect it.</aside></div><p style="font-size:13px;color:var(--mu)">${r.btree&&binOK(r.btree)?'✓ ':'⚠ '}${l==='bn'?'পাঠ্যবইয়ের ধরনের গাছ: প্রতিটি নোডের ঠিক দুটি সন্তান এবং সব শব্দ একই সারিতে। ট্যাগ সরলীকৃত (D, N, V, P, Adj, Adv)। বড় পদগুচ্ছ একই লেবেলের নিচে ভাগ হয় (যেমন VP → VP PP); একশব্দের পদগুচ্ছ সরাসরি শব্দের উপরে বসে। যতিচিহ্ন বাদ। উপরের বিশ্লেষণ থেকেই তৈরি, তাই একই সীমাবদ্ধতা প্রযোজ্য।':'Textbook-style tree: every node has exactly two children and all words sit on one row. Tags are simplified (D, N, V, P, Adj, Adv). Longer phrases nest under the same label (e.g. VP → VP PP), and a one-word phrase sits directly above its word. Punctuation is omitted. Derived from the parse above, so the same limits apply.'}</p></div>
+<div id="mv" ${/^(m|all)$/.test(m)?'':'hidden'}><h2>${l==='bn'?'মিনিমালিস্ট প্রোগ্রাম (চমস্কি)':'Minimalist Program (Chomsky)'}</h2><div class="stage"><div class="sc" id="sm">${r.mtree?drawTree(r.mtree,'ms'):'<p style="padding:12px">Minimalist analysis is unavailable for this sentence.</p>'}</div><aside id="dm" class="card noprint">Select a node to inspect it.</aside></div><p style="font-size:13px;color:var(--mu)">${MINT[l==='bn'?1:0]}</p></div>
+<div id="dv" ${/^(c|m|b)$/.test(m)?'hidden':''}><h2>Dependency view</h2><div class="sc" id="sd">${drawDep(r)}</div><div class="lg" style="margin-top:8px">${dl}</div><div class="tw"><table><tr><th>#</th><th>Word</th><th>Lemma</th><th>POS</th><th>Relation</th><th>Head</th><th>Notes</th></tr>${t.map((x,i)=>{const d=r.dependencies[i];return`<tr><td>${i}</td><td lang="${r.language}">${esc(x.text)}</td><td>${esc(x.lemma)}</td><td>${x.pos}${x.unsure?' ?':''}</td><td>${d.rel}</td><td>${d.head<0?'ROOT':esc(t[d.head].text)}</td><td>${esc(x.feat||'')}</td></tr>`}).join('')}</table></div></div>
+<h2>${l==='bn'?'ব্যাকরণ বিশ্লেষণ':'Grammar analysis'}</h2><p id="exp" lang="${l}">${esc(explain(r,l))}</p>
+<div class="row noprint"><button id="e1">SVG</button><button id="e2">PNG</button><button id="e3">JSON</button><button id="e4">Bracketed text</button><button id="e5">Copy brackets</button><button id="e6">Copy analysis</button><button id="e7">Report (HTML)</button></div>`;
+bind();if(SEL)SEL=null}
+async function dl(name,blob){let d=null;try{if(typeof claude!=='undefined')d=await claude.use('downloads')}catch(e){}
+if(d){try{await d.save({filename:name,data:blob});$('#err').textContent=''}catch(e){if(!e||e.code!=='declined')$('#err').textContent='Download failed: '+((e&&(e.message||e.code))||'unknown error')}return}
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),999)}
+function svgBlob(){const s=$({d:'#ds',m:'#ms',b:'#bs'}[$('#md').value]||'#ts');return new Blob(['<?xml version="1.0" encoding="UTF-8"?>'+new XMLSerializer().serializeToString(s)],{type:'image/svg+xml;charset=utf-8'})}
+const cp=t=>navigator.clipboard?navigator.clipboard.writeText(t).catch(()=>{}):0;
+function bind(){const sc=$('#sc'),rr=()=>{$('#sc').innerHTML=drawTree(RES.tree);$('#sd').innerHTML=drawDep(RES);if(RES.mtree)$('#sm').innerHTML=drawTree(RES.mtree,'ms');if(RES.btree)$('#sb').innerHTML=drawTree(RES.btree,'bs',true)};
+sc.onclick=e=>{const g=e.target.closest('.nd');if(!g)return;pick(+g.dataset.id)};sc.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const g=e.target.closest('.nd');if(g){e.preventDefault();pick(+g.dataset.id)}}};
+sc.ondblclick=e=>{const g=e.target.closest('.nd');if(g){const n=find(+g.dataset.id);if(n.word===undefined){n.collapsed=!n.collapsed;rr()}}};
+function find(id,rt=RES.tree){let r=null;(function f(n){if(n.id===id)r=n;n.children.forEach(f)})(rt);return r}
+[['#sm','mtree','#dm'],['#sb','btree','#db']].forEach(([si,tk,di])=>{const sm=$(si);if(!(sm&&RES[tk]))return;const pk=id=>{const n=find(id,RES[tk]);SEL=n;rr();$(di).innerHTML=detail(n);const b=$(di+' #tg');if(b)b.onclick=()=>{n.collapsed=!n.collapsed;rr();$(di).innerHTML=detail(n)}};sm.onclick=e=>{const g=e.target.closest('.nd');if(g)pk(+g.dataset.id)};sm.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const g=e.target.closest('.nd');if(g){e.preventDefault();pk(+g.dataset.id)}}};sm.ondblclick=e=>{const g=e.target.closest('.nd');if(g){const n=find(+g.dataset.id,RES[tk]);if(n.word===undefined){n.collapsed=!n.collapsed;rr()}}}});
+function pick(id){const n=find(id);SEL=n;rr();$('#det').innerHTML=detail(n);const b=$('#tg');if(b)b.onclick=()=>{n.collapsed=!n.collapsed;rr();$('#det').innerHTML=detail(n)}}
+[sc,$('#sd'),$('#sm'),$('#sb')].filter(Boolean).forEach(el=>{let d=null;el.onpointerdown=e=>{if(e.target.closest('.nd'))return;d={x:e.clientX,y:e.clientY,l:el.scrollLeft,t:el.scrollTop}};el.onpointermove=e=>{if(d){el.scrollLeft=d.l-(e.clientX-d.x);el.scrollTop=d.t-(e.clientY-d.y)}};el.onpointerup=el.onpointerleave=()=>d=null});
+$('#zi').onclick=()=>{Z=Math.min(Z*1.2,3);rr()};$('#zo').onclick=()=>{Z=Math.max(Z/1.2,.4);rr()};$('#zr').onclick=()=>{Z=1;rr()};
+$('#e1').onclick=()=>dl('syntax-tree.svg',svgBlob());$('#dlb').onclick=()=>$('#e'+$('#dlf').value).click();
+$('#e2').onclick=()=>{const b=svgBlob(),u=URL.createObjectURL(b),im=new Image(),s=$({d:'#ds',m:'#ms',b:'#bs'}[$('#md').value]||'#ts'),vb=s.viewBox.baseVal;im.onload=()=>{const c=document.createElement('canvas');c.width=vb.width*2;c.height=vb.height*2;const x=c.getContext('2d');x.fillStyle=getComputedStyle(document.body).backgroundColor;x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);c.toBlob(b=>dl('syntax-tree.png',b))};im.src=u};
+$('#e3').onclick=()=>dl('syntax-tree.json',new Blob([toJSON(RES)],{type:'application/json'}));$('#e4').onclick=()=>dl('syntax-tree.txt',new Blob([bra(({m:RES.mtree,b:RES.btree}[$('#md').value]||RES.tree))],{type:'text/plain;charset=utf-8'}));
+$('#e5').onclick=()=>cp(bra(({m:RES.mtree,b:RES.btree}[$('#md').value]||RES.tree)));$('#e6').onclick=()=>cp($("#exp").textContent);$('#e7').onclick=()=>{const sv=$({d:'#ds',m:'#ms',b:'#bs'}[$('#md').value]||'#ts'),cs=getComputedStyle(document.body),h='<!doctype html><meta charset="utf-8"><title>Syntax report</title><body style="font:16px sans-serif;max-width:900px;margin:24px auto;padding:0 16px;background:'+cs.backgroundColor+';color:'+cs.color+'"><h1>'+esc(RES.sentence)+'</h1><div style="overflow:auto">'+new XMLSerializer().serializeToString(sv)+'</div><h2>Analysis</h2><p>'+esc($('#exp').textContent)+'</p><h2>Bracketed tree</h2><pre>'+esc(bra(RES.tree))+'</pre>';dl('syntax-report.html',new Blob([h],{type:'text/html'}))}}
+function run(){const e=$('#err');e.textContent='';try{Z=1;show(parse($('#in').value,$('#lang').value))}catch(x){e.textContent=String(x)}}
+const exl=()=>{const l=$('#lang').value;return l==='auto'?[...EX.en.map(s=>[s]),...EX.bn.map(s=>[s])].map(a=>a[0]):EX[l]};
+function fillEx(){$('#ex').innerHTML='<option value="">Choose an example…</option>'+['en','bn'].map(k=>`<optgroup label="${k==='en'?'English':'বাংলা'}">${EX[k].map(s=>`<option>${esc(s)}</option>`).join('')}</optgroup>`).join('')}
+fillEx();let ei=0;
+$('#ex').onchange=e=>{if(e.target.value){$('#in').value=e.target.value;run()}};
+$('#ld').onclick=()=>{const a=exl();$('#in').value=a[ei++%a.length];run()};
+$('#go').onclick=run;$('#cl').onclick=()=>{$('#in').value='';$('#err').textContent='';$('#out').innerHTML='<p style="color:var(--mu)">Enter a sentence or load an example to see its syntax tree.</p>'};
+$('#in').onkeydown=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')run()};
+['md','xl'].forEach(i=>$('#'+i).onchange=()=>RES&&show(RES));$('#lang').onchange=()=>{ei=0};
+$('#th').onclick=()=>{const d=document.documentElement,dk=d.dataset.theme==='dark'||(!d.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);d.dataset.theme=dk?'light':'dark';RES&&show(RES)};
+function selfTest(){let ok=0,n=0;const t=(c)=>{n++;if(c)ok++};
+EX.en.concat(EX.bn).forEach(s=>{try{const r=parse(s,'auto');t(r.warnings.every(w=>!/validation/.test(w))&&r.dependencies.filter(d=>d.rel==='root').length===1)}catch(e){t(false)}});
+t(bra(parse('The student reads a book.','en').tree).includes('(NN student)'));t(bra(parse('আমি একটি বই পড়ি।','bn').tree).includes('(PRP আমি)'));t(tokBN('আমি ভাত খাই।').length===4);t(detect('আমি')==='bn'&&detect('I')==='en');t(bra(parse('The cat is not here.','en').tree).includes('(RB not)'));EX.en.concat(EX.bn).forEach(s=>{const q=parse(s,'auto');t(!!q.mtree);t(!!q.btree&&binOK(q.btree))});return ok+'/'+n+' checks passed'}
+
+const dlg=h=>{$('#dgc').innerHTML=h;$('#dg').showModal()};
+$('#hp').onclick=()=>dlg('<h2>How to use</h2><p>Type a sentence (English or বাংলা), pick a mode, and press Generate (or Ctrl/Cmd+Enter). Click a node for details, double-click to collapse a branch, drag to pan, use +/− to zoom. Dependency labels are explained in the legend.</p><p><b>Self-test:</b> '+selfTest()+'</p>');
+$('#ab').onclick=()=>dlg('<h2>About and limits</h2><p>This build runs fully in your browser with a <b>rule-based parser</b> (small lexicons, suffix rules, SOV chunking for Bangla). It is not a trained model, so it handles the sample constructions (simple, passive, wh-questions, negation, that-clauses, Bangla যে-clauses) but will misparse long or ambiguous sentences. Unknown words default to nouns and are drawn with dashed outlines. Bangla morphology (case suffixes, compound verbs) is only partly covered. For production accuracy, add a backend (Stanza or UDPipe models for Bangla; spaCy/benepar for English) that returns this same JSON shape (see JSON export).</p>');
+</script></body></html>
